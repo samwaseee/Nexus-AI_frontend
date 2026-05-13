@@ -144,7 +144,7 @@ export function GigCard({ gig }: GigCardProps) {
           </p>
         </div>
         <Button size="sm" className="font-semibold shadow-sm transition-transform active:scale-95" asChild>
-          <Link href={`/explore/${gig._id}`}>View Details</Link>
+          <Link href={`/gigs/${gig.slug}`}>View Details</Link>
         </Button>
       </CardFooter>
 

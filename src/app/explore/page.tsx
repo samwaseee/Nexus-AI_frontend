@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
+import { useState, useEffect } from "react";
+// 1. Import keepPreviousData
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+// 2. Import Chevron icons for the buttons
+import { Search, SlidersHorizontal, X, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { GigCard } from "@/components/cards/GigCard";
 import { GigCardSkeleton } from "@/components/cards/GigCardSkeleton";
 import { SearchBar } from "@/components/shared/SearchBar";
@@ -44,28 +46,45 @@ export default function ExplorePage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Fetch gigs reacting to ALL filters and sorting
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["gigs", searchQuery, category, minPrice, maxPrice, sortBy],
+  // 3. Add Pagination State
+  const [page, setPage] = useState(1);
+  const limit = 6;
+
+  // 4. Reset to page 1 whenever a filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, category, minPrice, maxPrice, sortBy]);
+
+  // Fetch gigs reacting to ALL filters, sorting, AND pagination
+  const { data, isLoading, error, isFetching } = useQuery({
+    // Add `page` to the queryKey so it refetches when the page changes
+    queryKey: ["gigs", searchQuery, category, minPrice, maxPrice, sortBy, page],
     queryFn: async () => {
       const res = await gigApi.getGigs({
         search: searchQuery,
         category: category === "All" ? undefined : category,
         minPrice: minPrice ? Number(minPrice) : undefined,
         maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        sortBy: sortBy, // Added sort parameter
+        sortBy: sortBy,
+        page: page,   // Send page to backend
+        limit: limit, // Send limit to backend
       });
       return res.data;
     },
+    // 5. Keep the old data on screen while fetching the next page
+    placeholderData: keepPreviousData,
   });
 
+  // Extract gigs and pagination metadata from your backend response
   const gigs: Gig[] = data?.data ?? [];
+  const totalPages = data?.meta?.totalPages || data?.meta?.pageCount || 1; // Backend must return this!
 
   const handleResetFilters = () => {
     setCategory("All");
     setMinPrice("");
     setMaxPrice("");
     setSortBy("newest");
+    setPage(1); // Reset page on clear
   };
 
   const activeFilterCount = (category !== "All" ? 1 : 0) + (minPrice || maxPrice ? 1 : 0);
@@ -74,7 +93,7 @@ export default function ExplorePage() {
   return (
     <div className="container py-10 md:py-16">
       <div className="flex flex-col gap-8">
-        
+
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -88,7 +107,7 @@ export default function ExplorePage() {
         {/* Search & Filters Toolbar */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-muted/30 p-4 rounded-lg border">
-            
+
             {/* Search */}
             <div className="w-full sm:max-w-md">
               <SearchBar
@@ -99,7 +118,7 @@ export default function ExplorePage() {
 
             {/* Actions: Sort & Filter */}
             <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-              
+
               {/* Sort Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -122,8 +141,8 @@ export default function ExplorePage() {
               </DropdownMenu>
 
               {/* Filter Toggle */}
-              <Button 
-                variant={showFilters ? "default" : "outline"} 
+              <Button
+                variant={showFilters ? "default" : "outline"}
                 className="w-full sm:w-auto relative"
                 onClick={() => setShowFilters(!showFilters)}
               >
@@ -142,7 +161,7 @@ export default function ExplorePage() {
           {showFilters && (
             <div className="p-6 bg-card border rounded-lg animate-in fade-in slide-in-from-top-2 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
+
                 {/* Category Filter */}
                 <div className="space-y-3">
                   <Label className="text-base">Category</Label>
@@ -208,7 +227,7 @@ export default function ExplorePage() {
         {/* Gig Grid & States */}
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: limit }).map((_, i) => (
               <GigCardSkeleton key={i} />
             ))}
           </div>
@@ -222,16 +241,44 @@ export default function ExplorePage() {
             icon={Search}
             title="No gigs found"
             description="We couldn't find any gigs matching your exact filters."
-            action={<Button onClick={() => { setSearchQuery(""); handleResetFilters(); }}>Clear All Filters</Button>}
+            action={<Button onClick={handleResetFilters}>Clear All Filters</Button>}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {gigs.map((gig) => (
-              <GigCard key={gig._id} gig={gig} />
-            ))}
+          <div className="space-y-8">
+            {/* The Grid - slightly dims when fetching the next page */}
+            <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${isFetching ? 'opacity-60 transition-opacity duration-200' : ''}`}>
+              {gigs.map((gig) => (
+                <GigCard key={gig._id} gig={gig} />
+              ))}
+            </div>
+
+            {/* 6. Functional Pagination Buttons */}
+            {!isLoading && totalPages > 0 && (
+              <div className="mt-8 flex items-center justify-center gap-4 border-t pt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1 || isFetching}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                </Button>
+
+                <div className="text-sm font-medium text-muted-foreground">
+                  Page {page} of {totalPages}
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages || isFetching}
+                >
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
-        
+
       </div>
     </div>
   );

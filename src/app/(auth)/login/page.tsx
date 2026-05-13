@@ -99,7 +99,7 @@ function LoginForm() {
                   size="sm"
                   className="border-dashed border-primary/50 hover:bg-primary/5"
                   onClick={() => {
-                    setEmail("freelancer@nexusai.com");
+                    setEmail("user@nexusai.com");
                     setPassword("Demo@1234");
                   }}
                   disabled={isLoading}
