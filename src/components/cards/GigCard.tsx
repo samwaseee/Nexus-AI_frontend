@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Clock, Star } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,31 +20,31 @@ export function GigCard({ gig }: GigCardProps) {
 
   return (
     <Card className="group flex flex-col h-full overflow-hidden border-border/60 bg-card hover:shadow-xl hover:border-primary/30 transition-all duration-300">
-      
+
       {/* Image Section */}
       <div className="relative h-48 w-full bg-muted flex-shrink-0 overflow-hidden">
         {gig.images?.[0] ? (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={gig.images[0]}
             alt={gig.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
             <span className="text-4xl transition-transform duration-500 group-hover:scale-110">💼</span>
           </div>
         )}
-        
+
         {/* Subtle overlay gradient for image contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Trending Badge (Glassmorphism style) */}
         {gig.aiDemandScore && gig.aiDemandScore > 85 && (
-          <Badge className="absolute top-3 left-3 bg-background/80 backdrop-blur-md text-primary font-semibold border-none shadow-sm"
-          variant="outline"
-  >
+          <Badge 
+            className="absolute top-3 left-3 bg-background/80 backdrop-blur-md text-primary font-semibold border-none shadow-sm"
+            variant="outline"
+          >
             🔥 Trending
           </Badge>
         )}
@@ -62,6 +62,7 @@ export function GigCard({ gig }: GigCardProps) {
                   width={24}
                   height={24}
                   className="object-cover"
+                  unoptimized // Bypasses Next.js image optimization errors for DiceBear SVGs
                 />
               ) : (
                 <div className="h-full w-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
@@ -81,7 +82,7 @@ export function GigCard({ gig }: GigCardProps) {
           <h3 className="font-bold text-base leading-snug line-clamp-2 min-h-[2.75rem] group-hover:text-primary transition-colors">
             {gig.title}
           </h3>
-          
+
           {/* min-h-[2.5rem] strictly reserves exactly 2 lines of space for description */}
           <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
             {gig.shortDescription}
@@ -91,9 +92,9 @@ export function GigCard({ gig }: GigCardProps) {
         {/* Tags Container (Fixed height to prevent wrapping pushing layout down) */}
         <div className="flex flex-wrap gap-1.5 h-[24px] overflow-hidden">
           {gig.tags.slice(0, 3).map((tag) => (
-            <Badge 
-              key={tag} 
-              variant="secondary" 
+            <Badge
+              key={tag}
+              variant="secondary"
               className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors border-none font-medium"
             >
               {tag}
@@ -120,7 +121,7 @@ export function GigCard({ gig }: GigCardProps) {
               )}
             </div>
           </div>
-          
+
           {gig.totalReviews > 0 && (
             <div className="flex items-center gap-1">
               <RatingStars rating={gig.averageRating} size="sm" />
@@ -146,7 +147,7 @@ export function GigCard({ gig }: GigCardProps) {
           <Link href={`/explore/${gig._id}`}>View Details</Link>
         </Button>
       </CardFooter>
-      
+
     </Card>
   );
 }
