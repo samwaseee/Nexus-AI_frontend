@@ -9,7 +9,7 @@ import { aiApi } from "@/lib/api";
 
 export default function AIRecommendationsPage() {
   // Fetch AI recommendations based on user's current skills
-  const { data, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["ai-recommendations"],
     queryFn: async () => {
       // In a real flow, you'd pass the user's actual skills here

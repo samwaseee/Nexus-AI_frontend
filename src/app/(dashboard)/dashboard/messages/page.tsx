@@ -79,7 +79,7 @@ export default function MessagesPage() {
 
           <div className="flex gap-3 max-w-[80%] ml-auto flex-row-reverse">
             <div className="bg-primary text-primary-foreground p-3 rounded-2xl rounded-br-none text-sm shadow-sm">
-              Thanks Michael! Yes, I can add Stripe. I'll send over a custom offer for that addition right now.
+              Thanks Michael! Yes, I can add Stripe. I&apos;ll send over a custom offer for that addition right now.
             </div>
           </div>
         </div>
