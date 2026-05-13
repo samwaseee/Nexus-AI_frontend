@@ -11,7 +11,9 @@ import {
   Lightbulb, 
   MessageSquare, 
   BarChart3, 
-  Briefcase
+  Briefcase,
+  Users,
+  Settings
 } from "lucide-react";
 
 export function DashboardSidebar() {
@@ -39,18 +41,42 @@ export function DashboardSidebar() {
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   ];
 
-  const links = role === "client" 
-    ? [...commonLinks, ...clientLinks]
-    : [...commonLinks, ...freelancerLinks];
+  // Admin specific links
+  const adminLinks = [
+    { name: "Platform Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Manage Users", href: "/dashboard/admin/users", icon: Users },
+    { name: "Manage Gigs", href: "/dashboard/admin/gigs", icon: Briefcase },
+    { name: "System Settings", href: "/dashboard/admin/settings", icon: Settings },
+  ];
+
+  // Resolve links based on role
+  let links;
+  if (role === "admin") {
+    links = adminLinks;
+  } else if (role === "client") {
+    links = [...commonLinks, ...clientLinks];
+  } else {
+    links = [...commonLinks, ...freelancerLinks];
+  }
 
   return (
-    <aside className="w-64 border-r bg-card min-h-[calc(100vh-4rem)] hidden md:block">
-      <nav className="flex flex-col gap-2 p-4">
-        <div className="mb-4 px-4">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {role === "client" ? "Client Portal" : "Talent Portal"}
+    <aside 
+      className="group relative z-20 hidden md:flex flex-col border-r bg-card min-h-[calc(100vh-4rem)] w-16 hover:w-64 transition-[width] duration-300 ease-in-out overflow-x-hidden"
+    >
+      {/* We force the inner nav to always be 64 (256px) wide. 
+        This prevents the text from wrapping/crunching onto multiple lines 
+        while the parent aside is animating its width.
+      */}
+      <nav className="flex w-64 flex-col gap-2 p-3">
+        
+        {/* Portal Title Header */}
+        <div className="mb-4 mt-2 flex h-6 items-center px-2">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {role === "admin" ? "Admin Portal" : role === "client" ? "Client Portal" : "Talent Portal"}
           </h2>
         </div>
+
+        {/* Links Map */}
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
@@ -60,14 +86,21 @@ export function DashboardSidebar() {
               key={link.name}
               href={link.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors",
+                "flex items-center rounded-md px-2.5 py-2.5 text-sm font-medium transition-colors",
                 isActive 
                   ? "bg-primary/10 text-primary" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-              {link.name}
+              {/* Fixed width container for icon keeps it perfectly centered when collapsed */}
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+              </div>
+              
+              {/* Text fades in and out smoothly on hover */}
+              <span className="ml-4 whitespace-nowrap opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                {link.name}
+              </span>
             </Link>
           );
         })}

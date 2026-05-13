@@ -226,7 +226,7 @@ export default function ExplorePage() {
 
         {/* Gig Grid & States */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: limit }).map((_, i) => (
               <GigCardSkeleton key={i} />
             ))}
@@ -246,7 +246,7 @@ export default function ExplorePage() {
         ) : (
           <div className="space-y-8">
             {/* The Grid - slightly dims when fetching the next page */}
-            <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${isFetching ? 'opacity-60 transition-opacity duration-200' : ''}`}>
+            <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ${isFetching ? 'opacity-60 transition-opacity duration-200' : ''}`}>
               {gigs.map((gig) => (
                 <GigCard key={gig._id} gig={gig} />
               ))}
