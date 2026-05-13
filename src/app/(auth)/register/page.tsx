@@ -85,7 +85,7 @@ export default function RegisterPage() {
         router.push("/");
         router.refresh(); // Force Next.js layout to read the new session
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please make sure the backend is running.");
       setIsLoading(false);
     }

@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { API_BASE_URL } from "./constants";
+import { Availability, UserRole } from "@/types";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -90,10 +91,10 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user._id = token._id as string;
-        session.user.role = token.role as any; // Cast to 'any' then 'UserRole' if needed
+        session.user.role = token.role as UserRole; 
         session.user.accessToken = token.accessToken as string;
         session.user.isVerified = token.isVerified as boolean;
-        session.user.availability = token.availability as any;
+        session.user.availability = token.availability as Availability;
       }
       return session;
     },

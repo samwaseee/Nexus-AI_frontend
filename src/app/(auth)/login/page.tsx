@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/card";
 import { PasswordInput } from "@/components/shared/PasswordInput";
 
-export default function LoginPage() {
+// 1. We renamed your main component to "LoginForm" (removed 'export default')
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -49,9 +50,9 @@ export default function LoginPage() {
 
       if (res?.ok) {
         router.push(callbackUrl);
-        router.refresh(); // Force Next.js layout to read the new session
+        router.refresh(); 
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again later.");
       setIsLoading(false);
     }
@@ -212,7 +213,7 @@ export default function LoginPage() {
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/register"
             className="ml-1 font-medium text-primary hover:underline"
@@ -222,5 +223,18 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+// 2. We created a NEW "LoginPage" that just wraps the form in Suspense
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
