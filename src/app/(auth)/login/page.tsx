@@ -16,12 +16,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DEMO_CREDENTIALS } from "@/lib/constants";
+import { PasswordInput } from "@/components/shared/PasswordInput";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -78,6 +78,49 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Demo Credentials Section */}
+            <div className="space-y-3 pb-2">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground font-medium">
+                    Quick Demo Access
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-dashed border-primary/50 hover:bg-primary/5"
+                  onClick={() => {
+                    setEmail("freelancer@nexusai.com");
+                    setPassword("Demo@1234");
+                  }}
+                  disabled={isLoading}
+                >
+                  Freelancer
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-dashed border-primary/50 hover:bg-primary/5"
+                  onClick={() => {
+                    setEmail("client@nexusai.com");
+                    setPassword("Demo@1234");
+                  }}
+                  disabled={isLoading}
+                >
+                  Client
+                </Button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -90,6 +133,7 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             </div>
+            
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -100,9 +144,9 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              {/* Upgraded Password Input */}
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -115,19 +159,6 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-dashed border-primary/50 hover:bg-primary/5"
-              onClick={() => {
-                setEmail(DEMO_CREDENTIALS.user.email);
-                setPassword(DEMO_CREDENTIALS.user.password);
-              }}
-              disabled={isLoading}
-            >
-              Fill Demo Credentials
-            </Button>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

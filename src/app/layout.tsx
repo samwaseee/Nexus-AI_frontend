@@ -4,6 +4,10 @@ import "./globals.css";
 import { Providers } from "@/providers/Providers";
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 
+// Import your layout components
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -32,7 +36,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {/* Flex wrapper to keep footer at the bottom */}
+          <div className="relative flex min-h-screen flex-col">
+            <Navbar />
+            {/* Main content area */}
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </Providers>
       </body>
     </html>
   );

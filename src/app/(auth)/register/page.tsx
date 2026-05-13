@@ -16,8 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { API_BASE_URL} from "@/lib/constants";
+import { API_BASE_URL } from "@/lib/constants";
 import { UserRole } from "@/types";
+import { PasswordInput } from "@/components/shared/PasswordInput";
+import { registerSchema } from "@/validations/auth.schema";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -28,19 +30,33 @@ export default function RegisterPage() {
   const [role, setRole] = useState<UserRole>("freelancer");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({}); // Added field error state
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFieldErrors({});
+
+    // 1. Zod Validation Check
+    const validation = registerSchema.safeParse({ name, email, password, role });
+    if (!validation.success) {
+      const formattedErrors: Record<string, string> = {};
+      validation.error.issues.forEach((issue) => {
+        // Cast the path key to a string to satisfy TypeScript
+        formattedErrors[String(issue.path[0])] = issue.message;
+      });
+      setFieldErrors(formattedErrors);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // 1. Register the user via your backend API
+      // 2. Register the user via your backend API
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify(validation.data), // Use validated data
       });
 
       const data = await res.json();
@@ -51,12 +67,12 @@ export default function RegisterPage() {
         return;
       }
 
-      // 2. If registration is successful, automatically log them in via NextAuth
+      // 3. If registration is successful, automatically log them in via NextAuth
       const signInResult = await signIn("credentials", {
         redirect: false,
-        email,
-        password,
-        callbackUrl: "/dashboard",
+        email: validation.data.email,
+        password: validation.data.password,
+        callbackUrl: "/",
       });
 
       if (signInResult?.error) {
@@ -66,7 +82,7 @@ export default function RegisterPage() {
       }
 
       if (signInResult?.ok) {
-        router.push("/dashboard");
+        router.push("/");
         router.refresh(); // Force Next.js layout to read the new session
       }
     } catch (err) {
@@ -77,7 +93,7 @@ export default function RegisterPage() {
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/" });
   };
 
   return (
@@ -127,10 +143,13 @@ export default function RegisterPage() {
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
                 disabled={isLoading}
               />
+              {fieldErrors.name && (
+                <p className="text-xs text-destructive">{fieldErrors.name}</p>
+              )}
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -139,21 +158,25 @@ export default function RegisterPage() {
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 disabled={isLoading}
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive">{fieldErrors.email}</p>
+              )}
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              {/* Swapped standard Input for PasswordInput */}
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
                 disabled={isLoading}
-                minLength={6}
               />
+              {fieldErrors.password && (
+                <p className="text-xs text-destructive">{fieldErrors.password}</p>
+              )}
             </div>
 
             {error && (
