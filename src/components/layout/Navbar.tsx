@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui-custom/ThemeToggle";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { BrainCircuit, Menu } from "lucide-react";
 
 export function Navbar() {

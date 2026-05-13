@@ -1,10 +1,16 @@
-import * as z from "zod";
+import { z } from "zod";
 
 export const profileSchema = z.object({
-  bio: z.string().max(500, { message: "Bio cannot exceed 500 characters." }).optional(),
-  skills: z.array(z.string()).min(1, { message: "Please add at least one skill." }),
-  hourlyRate: z.coerce.number().min(5, { message: "Minimum rate must be at least $5." }).optional(),
-  portfolioUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
+  name: z.string().min(2).max(100).optional(),
+  headline: z.string().max(150).optional(),
+  bio: z.string().max(500).optional(),
+  location: z.string().optional(),
+  skills: z.array(z.string()).max(20).optional(),
+  hourlyRate: z.number().min(0).optional(),
+  availability: z.enum(["available", "busy", "unavailable"]).optional(),
+  portfolioUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  linkedinUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  githubUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
-export type ProfileFormValues = z.infer<typeof profileSchema>;
+export type ProfileInput = z.infer<typeof profileSchema>;

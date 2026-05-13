@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DEMO_CREDENTIALS } from "@/lib/constants";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -114,6 +115,19 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-dashed border-primary/50 hover:bg-primary/5"
+              onClick={() => {
+                setEmail(DEMO_CREDENTIALS.user.email);
+                setPassword(DEMO_CREDENTIALS.user.password);
+              }}
+              disabled={isLoading}
+            >
+              Fill Demo Credentials
+            </Button>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

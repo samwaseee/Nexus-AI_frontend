@@ -6,14 +6,21 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute cache
-        retry: 1,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5, // Upgraded to 5 minutes
+            retry: 1,
+            refetchOnWindowFocus: false, // Prevents aggressive refetching
+          },
+          mutations: {
+            retry: 0, // Usually better to fail fast on mutations
+          },
+        },
+      })
+  );
 
   return (
     <SessionProvider>
