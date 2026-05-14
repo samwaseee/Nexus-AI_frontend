@@ -135,4 +135,8 @@ export const adminApi = {
     api.get("/admin/gigs", { params }),
   updateGigStatus: (id: string, status: string) =>
     api.patch(`/admin/gigs/${id}/status`, { status }),
+  getDisputes: (params?: Record<string, unknown>) => 
+    api.get("/admin/disputes", { params }),
+  resolveDispute: (id: string, resolution: "resolved_client" | "resolved_freelancer") => 
+    api.patch(`/admin/disputes/${id}/resolve`, { resolution }),
 };

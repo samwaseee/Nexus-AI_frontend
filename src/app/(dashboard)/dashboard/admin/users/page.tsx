@@ -11,12 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { adminApi } from "@/lib/api"; 
 
+// 1. UPDATED INTERFACE to match your MongoDB Schema
 interface AdminUser {
   _id: string;
   name: string;
   email: string;
   role: "freelancer" | "client" | "admin";
-  status: "active" | "suspended";
+  isActive: boolean; // Changed from status string to boolean!
   avatar?: string;
 }
 
@@ -25,22 +26,19 @@ export default function ManageUsersPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // 1. Debounce search to protect database from input spam
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // 2. Fetch Users matching your exact backend return shape
   const { data: response, isLoading } = useQuery({
     queryKey: ["admin-users", debouncedSearch],
     queryFn: () => adminApi.getUsers({ search: debouncedSearch }).then((res) => res.data),
   });
 
-  // Pull array out of your backend's API wrapper envelope
+  // Your sendSuccess utility wraps data inside a "data" property
   const users = response?.data || [];
 
-  // 3. Status Mutation using your exact toggleUserStatus helper
   const statusMutation = useMutation({
     mutationFn: (id: string) => adminApi.toggleUserStatus(id),
     onSuccess: () => {
@@ -48,7 +46,6 @@ export default function ManageUsersPage() {
     },
   });
 
-  // 4. Role Mutation matching your exact route signatures
   const roleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: string }) => 
       adminApi.updateUserRole(id, role),
@@ -57,7 +54,6 @@ export default function ManageUsersPage() {
     },
   });
 
-  // Action Triggers
   const handleToggleStatus = (id: string) => {
     statusMutation.mutate(id);
   };
@@ -136,8 +132,9 @@ export default function ManageUsersPage() {
                         </Badge>
                       </td>
                       <td className="p-4 align-middle">
-                        <Badge variant={user.status === "active" ? "secondary" : "destructive"} className="capitalize">
-                          {user.status}
+                        {/* 2. UPDATED LOGIC to use isActive */}
+                        <Badge variant={user.isActive ? "secondary" : "destructive"} className="capitalize">
+                          {user.isActive ? "Active" : "Suspended"}
                         </Badge>
                       </td>
                       <td className="p-4 align-middle text-right flex justify-end gap-2">
@@ -154,11 +151,11 @@ export default function ManageUsersPage() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          title={user.status === "active" ? "Suspend Account" : "Reactivate Account"}
+                          title={user.isActive ? "Suspend Account" : "Reactivate Account"}
                           onClick={() => handleToggleStatus(user._id)}
                           disabled={statusMutation.isPending}
                         >
-                          {user.status === "active" ? (
+                          {user.isActive ? (
                             <UserX className="h-4 w-4 text-destructive" />
                           ) : (
                             <UserCheck className="h-4 w-4 text-green-500" />

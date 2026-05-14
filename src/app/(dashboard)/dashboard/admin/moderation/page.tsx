@@ -1,51 +1,51 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, X, ShieldCheck, Loader2, ExternalLink } from "lucide-react";
-import Link from "lucide-react";
+import { Check, X, ShieldCheck, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { adminApi } from "@/lib/api"; // Matches your global Axios api file
+import { adminApi } from "@/lib/api"; 
 
 interface AdminGig {
   _id: string;
   title: string;
-  price: number;
+  startingPrice: number; 
   category: string;
-  status: "pending" | "approved" | "rejected";
-  freelancerId?: {
+  status: string; 
+  freelancer?: { 
     name: string;
     email: string;
+    avatar?: string;
   };
 }
 
 export default function GigModerationPage() {
   const queryClient = useQueryClient();
 
-  // 1. Fetch Gigs from your Admin endpoint
   const { data: response, isLoading } = useQuery({
     queryKey: ["admin-gigs"],
     queryFn: () => adminApi.getGigs().then((res) => res.data),
+    refetchInterval: 5000, 
   });
 
   const gigs = response?.data || [];
-
-  // Filter for only pending gigs to keep the moderation queue focused
+  
+  // Assuming "pending" is the status for unapproved gigs in your DB
   const pendingGigs = gigs.filter((gig: AdminGig) => gig.status === "pending");
 
-  // 2. Status Mutation matching your exact: updateGigStatus(id, status)
   const moderationMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.updateGigStatus(id, status),
     onSuccess: () => {
-      // Instantly refresh the queue upon action
       queryClient.invalidateQueries({ queryKey: ["admin-gigs"] });
     },
   });
 
-  const handleAction = (id: string, status: "approved" | "rejected") => {
+  const handleAction = (id: string, status: "active" | "rejected") => {
+    // Assuming your backend uses "active" instead of "approved" based on getPlatformStats
+    // If your backend specifically uses "approved", leave this. If it expects "active", change it!
     moderationMutation.mutate({ id, status });
   };
 
@@ -99,7 +99,8 @@ export default function GigModerationPage() {
                         <div>
                           <p className="font-medium max-w-md truncate">{gig.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            By: {gig.freelancerId?.name || "Unknown Freelancer"}
+                            {/* 2. UPDATED LOGIC: Using freelancer.name */}
+                            By: {gig.freelancer?.name || "Unknown Freelancer"}
                           </p>
                         </div>
                       </td>
@@ -109,7 +110,7 @@ export default function GigModerationPage() {
                         </Badge>
                       </td>
                       <td className="p-4 align-middle font-semibold text-foreground">
-                        ${gig.price}
+                        ${gig.startingPrice}
                       </td>
                       <td className="p-4 align-middle text-right flex justify-end gap-2">
                         <Button
@@ -117,7 +118,7 @@ export default function GigModerationPage() {
                           size="icon"
                           title="Approve Listing"
                           className="hover:bg-green-500/10 hover:text-green-600"
-                          onClick={() => handleAction(gig._id, "approved")}
+                          onClick={() => handleAction(gig._id, "active")} // Sent 'active' based on your backend stats!
                           disabled={moderationMutation.isPending}
                         >
                           <Check className="h-4 w-4" />
