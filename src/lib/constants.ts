@@ -7,6 +7,7 @@ export const APP_DESCRIPTION =
 
 // ─── Routes ───────────────────────────────────────────────────────────────
 export const ROUTES = {
+  // Public / Marketing
   HOME: "/",
   LOGIN: "/login",
   REGISTER: "/register",
@@ -17,15 +18,33 @@ export const ROUTES = {
   CONTACT: "/contact",
   FAQ: "/faq",
   PRIVACY: "/privacy",
+
+  // Global AI Features (Standalone pages)
+  DASHBOARD_PITCH: "/ai-pitch",
+  DASHBOARD_RECOMMENDATIONS: "/recommendations",
+  DASHBOARD_CHAT: "/chat",
+  DASHBOARD_ANALYTICS: "/analytics",
+
+  // Core Dashboard
   DASHBOARD: "/dashboard",
   DASHBOARD_PROFILE: "/dashboard/profile",
-  DASHBOARD_PITCH: "/dashboard/ai-pitch",
-  DASHBOARD_RECOMMENDATIONS: "/dashboard/recommendations",
-  DASHBOARD_CHAT: "/dashboard/chat",
-  DASHBOARD_ANALYTICS: "/dashboard/analytics",
+  DASHBOARD_MESSAGES: "/dashboard/messages",
+
+  // Freelancer Dashboard
   DASHBOARD_GIGS: "/dashboard/gigs",
-  DASHBOARD_USERS: "/dashboard/users",
-  DASHBOARD_SETTINGS: "/dashboard/settings",
+  DASHBOARD_ORDERS: "/dashboard/orders",
+  DASHBOARD_FINANCES: "/dashboard/finances",
+
+  // Client Dashboard
+  DASHBOARD_PURCHASES: "/dashboard/purchases",
+  DASHBOARD_SAVED: "/dashboard/saved",
+  DASHBOARD_BILLING: "/dashboard/billing",
+
+  // Admin Dashboard
+  DASHBOARD_USERS: "/dashboard/admin/users",
+  DASHBOARD_MODERATION: "/dashboard/admin/moderation",
+  DASHBOARD_DISPUTES: "/dashboard/admin/disputes",
+  DASHBOARD_SETTINGS: "/dashboard/admin/settings",
 } as const;
 
 // ─── User Roles ───────────────────────────────────────────────────────────
