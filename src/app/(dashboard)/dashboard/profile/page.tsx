@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User, Lock, Mail, Loader2, Briefcase, MapPin, CheckCircle2 } from "lucide-react";
+import { Lock, Mail, Loader2, Briefcase, MapPin, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import api from "@/lib/api";
+import Image from "next/image";
 
 // Matching your Backend User Schema
 interface UserProfile {
@@ -25,6 +26,12 @@ interface UserProfile {
   skills?: string[];
   hourlyRate?: number;
   portfolioUrl?: string;
+}
+
+interface ChangePasswordInput {
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
 }
 
 export default function ProfilePage() {
@@ -69,7 +76,7 @@ export default function ProfilePage() {
 
   // Change Password Mutation
   const changePasswordMutation = useMutation({
-    mutationFn: (data: any) => api.post("/users/change-password", data),
+    mutationFn: (data: ChangePasswordInput) => api.post("/users/change-password", data),
     onSuccess: () => {
       setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
       showSuccess("Password changed successfully!");
@@ -139,7 +146,7 @@ export default function ProfilePage() {
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-6">
                   <div className="h-20 w-20 rounded-full bg-muted overflow-hidden border">
-                    <img 
+                    <Image 
                       src={profile?.avatar || `https://api.dicebear.com/8.x/initials/svg?seed=${profile?.name}`} 
                       alt="Avatar" 
                       className="h-full w-full object-cover"
