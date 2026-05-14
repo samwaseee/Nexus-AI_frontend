@@ -1,4 +1,4 @@
-import { BrainCircuit, Target, Users, Zap, Heart, Globe } from "lucide-react";
+import { BrainCircuit, Target, Zap, Heart, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -45,7 +45,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold">Our mission</h2>
             <p className="text-muted-foreground leading-relaxed">
               To give every freelancer — regardless of where they are or how
-              long they've been working — access to the same career intelligence
+              long they&apos;ve been working — access to the same career intelligence
               that top agencies have. Market data, AI-powered positioning, and
               personalized coaching, democratized.
             </p>
@@ -120,7 +120,7 @@ export default function AboutPage() {
           <BrainCircuit className="h-12 w-12 mx-auto opacity-80" />
           <h2 className="text-3xl font-bold">Join us in building the future of work</h2>
           <p className="text-primary-foreground/80 max-w-xl mx-auto">
-            Whether you're a freelancer looking to grow or a client looking for top talent —
+            Whether you&apos;re a freelancer looking to grow or a client looking for top talent —
             NexusAI is built for you.
           </p>
           <Button size="lg" variant="secondary" asChild>

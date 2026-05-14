@@ -33,7 +33,7 @@ export default function ContactPage() {
         <div className="text-center mb-12 space-y-3">
           <h1 className="text-4xl font-bold">Get in touch</h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Have a question, feedback, or partnership idea? We'd love to hear from you.
+            Have a question, feedback, or partnership idea? We&apos;d love to hear from you.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export default function ContactPage() {
                   <div className="flex flex-col items-center justify-center py-12 space-y-3 text-center">
                     <CheckCircle2 className="h-12 w-12 text-green-500" />
                     <h3 className="text-xl font-semibold">Message sent!</h3>
-                    <p className="text-muted-foreground">We'll get back to you within 24 hours.</p>
+                    <p className="text-muted-foreground">We&apos;ll get back to you within 24 hours.</p>
                     <Button variant="outline" onClick={() => { setSubmitted(false); setForm({ name: "", email: "", subject: "", message: "" }); }}>
                       Send another message
                     </Button>
