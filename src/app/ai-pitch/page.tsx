@@ -13,7 +13,7 @@ function PitchBuilderChat() {
   const searchParams = useSearchParams();
   
   // 1. Check if the user is actually logged in!
-  const { data: session, status } = useSession(); 
+  const { status } = useSession(); 
 
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
