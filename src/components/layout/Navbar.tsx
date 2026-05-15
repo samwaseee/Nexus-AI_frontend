@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   BrainCircuit,
   Menu,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
+import { UserAvatar } from "@/components/shared/UserAvatar"; // IMPORTANT: Import your custom component
 
 const publicNavLinks = [
   { href: ROUTES.EXPLORE, label: "Explore Gigs" },
@@ -51,13 +53,33 @@ export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   const user = session?.user;
-  const initials = user?.name
-    ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "NA";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <motion.header
+      initial={{ y: 0 }}
+      animate={{ y: isVisible ? 0 : "-100%" }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
+    >
       <div className="container flex h-16 items-center justify-between">
 
         {/* ─── Logo ─────────────────────────────────────────────────── */}
@@ -84,7 +106,6 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* AI Features dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1 px-3 py-2 rounded-md text-muted-foreground transition-colors hover:text-primary hover:bg-muted text-sm font-medium">
@@ -116,26 +137,26 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
 
+          {/* User Avatar Dropdown (Visible on BOTH Mobile and Desktop if logged in) */}
           {session ? (
-            /* Authenticated user menu */
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={ROUTES.DASHBOARD}>Dashboard</Link>
-              </Button>
-
+            <div className="flex items-center ml-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full border border-border bg-muted px-2 py-1 text-sm hover:bg-accent transition-colors">
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
-                      {initials}
-                    </div>
-                    <span className="max-w-[100px] truncate font-medium">{user?.name}</span>
-                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                  </button>
+                  {/* Clean circular button, no chevron arrow */}
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 overflow-hidden border border-border hover:ring-2 hover:ring-primary transition-all">
+                    {/* Using your custom UserAvatar component */}
+                    <UserAvatar 
+                      user={{ 
+                        name: user?.name || "User", 
+                        avatar: user?.image || undefined 
+                      }} 
+                      className="h-full w-full" 
+                    />
+                  </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 mt-1">
                   <DropdownMenuLabel>
-                    <div className="font-medium">{user?.name}</div>
+                    <div className="font-medium truncate">{user?.name}</div>
                     <div className="text-xs text-muted-foreground font-normal capitalize">{user?.role}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -181,22 +202,22 @@ export function Navbar() {
               </DropdownMenu>
             </div>
           ) : (
-            /* Guest buttons */
-            <div className="hidden md:flex items-center gap-2">
+            /* Guest buttons (Hidden on mobile, moved to hamburger) */
+            <div className="hidden md:flex items-center gap-2 ml-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link href={ROUTES.LOGIN}>Log In</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href={ROUTES.REGISTER}>Sign Up Free</Link>
+                <Link href={ROUTES.REGISTER}>Sign Up</Link>
               </Button>
             </div>
           )}
 
-          {/* Mobile menu toggle */}
+          {/* Mobile menu toggle (Hamburger) */}
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden ml-1"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -204,9 +225,9 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* ─── Mobile menu ─────────────────────────────────────────────── */}
+      {/* ─── Mobile menu (Hamburger Content ONLY) ────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden border-t bg-background px-4 py-4 space-y-1">
+        <div className="md:hidden border-t bg-background px-4 py-4 space-y-1 shadow-xl">
           {publicNavLinks.map((link) => (
             <Link
               key={link.href}
@@ -231,31 +252,20 @@ export function Navbar() {
               </Link>
             ))}
           </div>
-          <div className="pt-2 border-t mt-2 flex flex-col gap-2">
-            {session ? (
-              <>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link href={ROUTES.DASHBOARD} onClick={() => setMobileOpen(false)}>
-                    Dashboard
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => { signOut({ callbackUrl: "/" }); setMobileOpen(false); }}>
-                  Log Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>Log In</Link>
-                </Button>
-                <Button size="sm" asChild className="w-full">
-                  <Link href={ROUTES.REGISTER} onClick={() => setMobileOpen(false)}>Sign Up Free</Link>
-                </Button>
-              </>
-            )}
-          </div>
+
+          {/* Login/Signup inside hamburger ONLY if logged out */}
+          {!session && (
+            <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
+              <Button variant="outline" size="lg" asChild className="w-full">
+                <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>Log In</Link>
+              </Button>
+              <Button size="lg" asChild className="w-full">
+                <Link href={ROUTES.REGISTER} onClick={() => setMobileOpen(false)}>Sign Up Free</Link>
+              </Button>
+            </div>
+          )}
         </div>
       )}
-    </header>
+    </motion.header>
   );
 }
