@@ -1,5 +1,4 @@
 # NexusAI Frontend
-# 🚀 NexusAI Frontend
 
 A modern AI-powered freelance marketplace frontend built with Next.js App Router, Tailwind CSS, React Query, NextAuth, and TypeScript.
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js)](https://nextjs.org/)
