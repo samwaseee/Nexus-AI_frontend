@@ -24,7 +24,7 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="py-20 md:py-28 bg-muted/30">
         <div className="container max-w-4xl text-center space-y-6">
-          <Badge variant="secondary" className="mb-2">Our Story</Badge>
+          <Badge variant="secondary" className="mb-2 px-6 py-2 text-2xl font-bold">Our Story</Badge>
           <h1 className="text-4xl md:text-5xl font-bold">
             We built the career layer the{" "}
             <span className="text-primary">gig economy was missing</span>
