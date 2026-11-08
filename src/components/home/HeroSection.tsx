@@ -257,7 +257,7 @@ export function HeroSection() {
               className="px-5 py-2 text-sm bg-background/50 border-primary/30 text-foreground backdrop-blur-md rounded-full shadow-sm"
             >
               <GeminiLogo className="h-4 w-4 mr-2 text-primary" />
-              Powered by Gemini 3.0
+              Powered by Gemini 3.5
             </Badge>
           </motion.div>
 

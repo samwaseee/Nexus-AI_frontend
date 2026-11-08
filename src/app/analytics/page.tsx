@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="h-5 w-5 text-primary" />
-            Gemini 1.5 Analysis
+            Gemini 3.5 Analysis
           </CardTitle>
           <CardDescription>Real-time strategic synthesis of your market performance.</CardDescription>
         </CardHeader>
