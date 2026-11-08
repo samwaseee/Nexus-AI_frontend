@@ -91,7 +91,7 @@ export default function ExplorePage() {
   const currentSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
 
   return (
-    <div className="container py-10 md:py-16">
+    <div className="container md:py-16">
       <div className="flex flex-col gap-8">
 
         {/* Header */}

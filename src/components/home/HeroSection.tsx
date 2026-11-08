@@ -176,7 +176,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden min-h-[95vh] pt-32 pb-0 bg-background flex flex-col items-center justify-center [perspective:2000px]">
+    <section className="relative overflow-hidden min-h-[95vh] pb-0 bg-background flex flex-col items-center justify-center [perspective:2000px]">
 
       {/* ─── LAYER 1: LIQUID BACKGROUND ─── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
