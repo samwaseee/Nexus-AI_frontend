@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   // Grab the token (NextAuth handles the secret automatically in most setups, 
   // but if it fails, add secret: process.env.NEXTAUTH_SECRET)
-  const token = await getToken({ req });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie: req.nextUrl.protocol === "https:" });
   const { pathname } = req.nextUrl;
 
   // ─── 1. AUTH PAGES (Hide if logged in) ──────────────────────────────────
