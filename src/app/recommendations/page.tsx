@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, ArrowRight, Activity, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRecommendations } from "@/hooks/useAI";
+import api from "@/lib/api";
 
 // ─── TYPES ──────────────────────────────────────────────────────────────
 type SkillInsight = {
@@ -25,6 +28,11 @@ type AIInsightsData = {
   suggestedGigs: GigInsight[];
 };
 
+type UserProfile = {
+  headline?: string;
+  skills?: string[];
+};
+
 // ─── GEMINI LOGO COMPONENT ──────────────────────────────────────────────
 const GeminiLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className={className}>
@@ -32,11 +40,21 @@ const GeminiLogo = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const CACHE_KEY = "nexus_ai_insights_cache";
+const CACHE_KEY_PREFIX = "nexus_ai_insights_cache_";
 const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days in milliseconds
 
 export default function AIRecommendationsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
+  const { data: profile, isLoading: isProfileLoading, isError: isProfileError } = useQuery({
+    queryKey: ["user-profile", userId],
+    queryFn: async () => {
+      const response = await api.get("/users/profile");
+      return response.data.data as UserProfile;
+    },
+    enabled: Boolean(userId),
+  });
 
   // Local state to hold the data since we are using a mutation hook
   const [data, setData] = useState<AIInsightsData | null>(null);
@@ -48,53 +66,76 @@ export default function AIRecommendationsPage() {
 
   // 2. Fetch or load from cache on mount
   useEffect(() => {
+    if (status === "loading" || (userId && isProfileLoading)) return;
+
     const loadData = async () => {
       setIsLoading(true);
       setIsError(false);
 
+      if (!userId || isProfileError) {
+        setIsError(true);
+        setIsLoading(false);
+        return;
+      }
+
+      const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
       // Check for valid cached data first
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { timestamp, payload } = JSON.parse(cached);
-        // If the cache is less than 7 days old, load it and skip the API call
-        if (Date.now() - timestamp < CACHE_DURATION_MS) {
-          setData(payload);
-          setIsLoading(false);
-          return;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const entry: unknown = JSON.parse(cached);
+          if (
+            typeof entry === "object" &&
+            entry !== null &&
+            "timestamp" in entry &&
+            typeof entry.timestamp === "number" &&
+            "payload" in entry &&
+            typeof entry.payload === "object" &&
+            entry.payload !== null &&
+            "skillsToLearn" in entry.payload &&
+            Array.isArray(entry.payload.skillsToLearn) &&
+            "suggestedGigs" in entry.payload &&
+            Array.isArray(entry.payload.suggestedGigs)
+          ) {
+            if (Date.now() - entry.timestamp < CACHE_DURATION_MS) {
+              setData(entry.payload as AIInsightsData);
+              setIsLoading(false);
+              return;
+            }
+          } else {
+            localStorage.removeItem(cacheKey);
+          }
         }
+      } catch {
+        localStorage.removeItem(cacheKey);
       }
 
       try {
         // Trigger your custom hook!
-        // You can pass any necessary user context here for the backend
         const res = await fetchRecommendations({
-          role: "freelancer",
-          focus: "tech"
+          skills: profile?.skills?.slice(0, 20).length
+            ? profile.skills.slice(0, 20)
+            : ["JavaScript", "React"],
+          currentRole: profile?.headline || "Freelancer",
+          interests: [],
+          recentActivity: [],
         });
 
-        // Use the response from your backend (fallback to simulated data if backend is empty during testing)
-        const freshData: AIInsightsData = res.data || {
-          skillsToLearn: [
-            { name: "Model Deployment (MLOps)", demand: "+45% Demand", variant: "default" },
-            { name: "Advanced RAG Pipelines", demand: "+32% Demand", variant: "default" },
-            { name: "Streamlit UI Integration", demand: "Emerging Trend", variant: "secondary" }
-          ],
-          suggestedGigs: [
-            {
-              title: "AI Chatbot Integration",
-              description: "Since you know React, offering OpenAI integration is highly lucrative.",
-            },
-            {
-              title: "Next.js Performance Audit",
-              description: "High demand from agencies needing to fix slow dashboards.",
-            }
-          ]
-        };
+        const payload = res.data?.data;
+        if (
+          !payload ||
+          !Array.isArray(payload.skillsToLearn) ||
+          !Array.isArray(payload.suggestedGigs)
+        ) {
+          setIsError(true);
+          return;
+        }
 
+        const freshData = payload as AIInsightsData;
         setData(freshData);
 
         // Save the fresh data to localStorage with a new timestamp
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
+        localStorage.setItem(cacheKey, JSON.stringify({
           timestamp: Date.now(),
           payload: freshData
         }));
@@ -108,7 +149,7 @@ export default function AIRecommendationsPage() {
     };
 
     loadData();
-  }, [fetchRecommendations]);
+  }, [fetchRecommendations, isProfileError, isProfileLoading, profile, status, userId]);
 
   // 3. Route to the Pitch Builder with Context
   const handleDraftGig = (title: string, description: string) => {
